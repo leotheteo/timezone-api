@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>When Is It For Me?</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>When is it for me?</h1>
+  <button id="themeToggle">🌙</button>
+</header>
+
+<section>
+  <h2>Natural Time Parser</h2>
+  <input id="text" placeholder="friday at 7pm est">
+  <input id="tz" placeholder="timezone (optional)">
+  <button onclick="parse()">Convert</button>
+  <pre id="result"></pre>
+</section>
+
+<section>
+  <h2>Timezone Normalizer</h2>
+  <input id="normalizeInput" placeholder="pst, pacific, est">
+  <button onclick="normalize()">Normalize</button>
+  <pre id="normalizeResult"></pre>
+</section>
+
+<footer>
+  <a href="/docs">API Docs</a>
+</footer>
+
+<script>
+const toggle = document.getElementById("themeToggle");
+toggle.onclick = () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("dark", document.body.classList.contains("dark"));
+};
+if (localStorage.getItem("dark") === "true") {
+  document.body.classList.add("dark");
+}
+
+async function parse() {
+  const text = document.getElementById("text").value;
+  const tz = document.getElementById("tz").value;
+  const res = await fetch("/api/when", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ text, timezone: tz })
+  });
+  document.getElementById("result").textContent =
+    JSON.stringify(await res.json(), null, 2);
+}
+
+async function normalize() {
+  const tz = document.getElementById("normalizeInput").value;
+  const res = await fetch(`/api/normalize?tz=${tz}`, { method: "POST" });
+  document.getElementById("normalizeResult").textContent =
+    JSON.stringify(await res.json(), null, 2);
+}
+</script>
+</body>
+</html>
